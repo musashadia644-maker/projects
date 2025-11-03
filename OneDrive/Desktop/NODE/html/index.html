@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Game App</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1>🧠 Quiz Game</h1>
+            <p>Test your knowledge with our fun quiz!</p>
+            <button id="start-btn" class="btn primary">Start Quiz</button>
+            <div class="difficulty-selector">
+                <label for="difficulty">Choose Difficulty:</label>
+                <select id="difficulty">
+                    <option value="easy">Easy (10 questions)</option>
+                    <option value="medium">Medium (15 questions)</option>
+                    <option value="hard">Hard (20 questions)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <div class="progress-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <div class="quiz-info">
+                    <span id="question-counter">Question 1 of 10</span>
+                    <span id="score-display">Score: 0</span>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <h2 id="question-text">Loading question...</h2>
+                <div id="answers-container" class="answers-container">
+                    <!-- Answer options will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <div class="quiz-controls">
+                <button id="next-btn" class="btn primary" disabled>Next Question</button>
+                <button id="skip-btn" class="btn secondary">Skip Question</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="screen">
+            <h1>🎉 Quiz Complete!</h1>
+            <div class="result-details">
+                <div class="score-circle">
+                    <span id="final-score">0</span>
+                    <span class="score-total">/ 10</span>
+                </div>
+                <div class="result-message">
+                    <h3 id="result-title">Great Job!</h3>
+                    <p id="result-description">You did amazing!</p>
+                </div>
+            </div>
+            
+            <div class="result-stats">
+                <div class="stat">
+                    <span class="stat-label">Correct Answers</span>
+                    <span id="correct-count" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Wrong Answers</span>
+                    <span id="wrong-count" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Accuracy</span>
+                    <span id="accuracy" class="stat-value">0%</span>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <button id="restart-btn" class="btn primary">Play Again</button>
+                <button id="review-btn" class="btn secondary">Review Answers</button>
+            </div>
+        </div>
+
+        <!-- Review Screen -->
+        <div id="review-screen" class="screen">
+            <h2>📝 Review Your Answers</h2>
+            <div id="review-container" class="review-container">
+                <!-- Review items will be dynamically inserted here -->
+            </div>
+            <button id="back-to-results" class="btn primary">Back to Results</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz Data
+        const quizData = {
+            easy: [
+                {
+                    question: "What is the capital of France?",
+                    options: ["London", "Berlin", "Paris", "Madrid"],
+                    correct: 2
+                },
+                {
+                    question: "Which planet is known as the Red Planet?",
+                    options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                    correct: 1
+                },
+                {
+                    question: "What is 2 + 2?",
+                    options: ["3", "4", "5", "6"],
+                    correct: 1
+                },
+                {
+                    question: "Which ocean is the largest?",
+                    options: ["Atlantic", "Indian", "Arctic", "Pacific"],
+                    correct: 3
+                },
+                {
+                    question: "What is the chemical symbol for water?",
+                    options: ["H2O", "CO2", "O2", "H2"],
+                    correct: 0
+                },
+                {
+                    question: "How many continents are there?",
+                    options: ["5", "6", "7", "8"],
+                    correct: 2
+                },
+                {
+                    question: "What is the largest mammal?",
+                    options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"],
+                    correct: 1
+                },
+                {
+                    question: "Which gas do plants absorb from the atmosphere?",
+                    options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"],
+                    correct: 2
+                },
+                {
+                    question: "What is the smallest prime number?",
+                    options: ["0", "1", "2", "3"],
+                    correct: 2
+                },
+                {
+                    question: "Which country is famous for the pyramids?",
+                    options: ["Greece", "Egypt", "Italy", "Turkey"],
+                    correct: 1
+                }
+            ],
+            medium: [
+                {
+                    question: "What is the speed of light in vacuum?",
+                    options: ["299,792,458 m/s", "300,000,000 m/s", "299,000,000 m/s", "298,792,458 m/s"],
+                    correct: 0
+                },
+                {
+                    question: "Who painted the Mona Lisa?",
+                    options: ["Pablo Picasso", "Vincent van Gogh", "Leonardo da Vinci", "Michelangelo"],
+                    correct: 2
+                },
+                {
+                    question: "What is the longest river in the world?",
+                    options: ["Amazon River", "Nile River", "Mississippi River", "Yangtze River"],
+                    correct: 1
+                },
+                {
+                    question: "Which element has the atomic number 1?",
+                    options: ["Helium", "Hydrogen", "Lithium", "Carbon"],
+                    correct: 1
+                },
+                {
+                    question: "In which year did World War II end?",
+                    options: ["1944", "1945", "1946", "1947"],
+                    correct: 1
+                },
+                {
+                    question: "What is the square root of 144?",
+                    options: ["10", "11", "12", "13"],
+                    correct: 2
+                },
+                {
+                    question: "Which programming language is known for its use in web development?",
+                    options: ["Python", "JavaScript", "C++", "Java"],
+                    correct: 1
+                },
+                {
+                    question: "What is the currency of Japan?",
+                    options: ["Yuan", "Won", "Yen", "Ringgit"],
+                    correct: 2
+                },
+                {
+                    question: "Who wrote 'Romeo and Juliet'?",
+                    options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
+                    correct: 1
+                },
+                {
+                    question: "What is the boiling point of water at sea level?",
+                    options: ["90°C", "95°C", "100°C", "105°C"],
+                    correct: 2
+                },
+                {
+                    question: "Which planet has the most moons?",
+                    options: ["Jupiter", "Saturn", "Uranus", "Neptune"],
+                    correct: 1
+                },
+                {
+                    question: "What is the largest organ in the human body?",
+                    options: ["Brain", "Liver", "Lungs", "Skin"],
+                    correct: 3
+                },
+                {
+                    question: "In which city is the Statue of Liberty located?",
+                    options: ["Boston", "Philadelphia", "New York", "Washington D.C."],
+                    correct: 2
+                },
+                {
+                    question: "What is the main component of the sun?",
+                    options: ["Helium", "Hydrogen", "Oxygen", "Carbon"],
+                    correct: 1
+                },
+                {
+                    question: "Which animal is known as the King of the Jungle?",
+                    options: ["Tiger", "Lion", "Elephant", "Leopard"],
+                    correct: 1
+                }
+            ],
+            hard: [
+                {
+                    question: "What is the Planck constant approximately?",
+                    options: ["6.626 × 10^-34 J⋅s", "6.626 × 10^-32 J⋅s", "6.626 × 10^-36 J⋅s", "6.626 × 10^-30 J⋅s"],
+                    correct: 0
+                },
+                {
+                    question: "Which algorithm is used for finding the shortest path in a graph?",
+                    options: ["Binary Search", "Dijkstra's Algorithm", "Quick Sort", "Merge Sort"],
+                    correct: 1
+                },
+                {
+                    question: "What is the time complexity of binary search?",
+                    options: ["O(n)", "O(log n)", "O(n²)", "O(1)"],
+                    correct: 1
+                },
+                {
+                    question: "Who developed the theory of relativity?",
+                    options: ["Isaac Newton", "Albert Einstein", "Stephen Hawking", "Niels Bohr"],
+                    correct: 1
+                },
+                {
+                    question: "What is the derivative of sin(x)?",
+                    options: ["cos(x)", "-cos(x)", "sin(x)", "-sin(x)"],
+                    correct: 0
+                },
+                {
+                    question: "Which data structure uses LIFO principle?",
+                    options: ["Queue", "Stack", "Array", "Linked List"],
+                    correct: 1
+                },
+                {
+                    question: "What is the atomic number of Carbon?",
+                    options: ["4", "5", "6", "7"],
+                    correct: 2
+                },
+                {
+                    question: "In which year was the first computer bug found?",
+                    options: ["1945", "1947", "1950", "1952"],
+                    correct: 1
+                },
+                {
+                    question: "What is the Big O notation for bubble sort?",
+                    options: ["O(n)", "O(n log n)", "O(n²)", "O(2^n)"],
+                    correct: 2
+                },
+                {
+                    question: "Which protocol is used for secure web communication?",
+                    options: ["HTTP", "HTTPS", "FTP", "SMTP"],
+                    correct: 1
+                },
+                {
+                    question: "What is the value of π (pi) to 4 decimal places?",
+                    options: ["3.1415", "3.1416", "3.1417", "3.1414"],
+                    correct: 1
+                },
+                {
+                    question: "Which sorting algorithm has the best average case time complexity?",
+                    options: ["Bubble Sort", "Quick Sort", "Insertion Sort", "Selection Sort"],
+                    correct: 1
+                },
+                {
+                    question: "What is the molecular formula of caffeine?",
+                    options: ["C8H10N4O2", "C7H8N4O2", "C8H9N4O2", "C9H10N4O2"],
+                    correct: 0
+                },
+                {
+                    question: "Which design pattern ensures only one instance of a class?",
+                    options: ["Factory Pattern", "Observer Pattern", "Singleton Pattern", "Strategy Pattern"],
+                    correct: 2
+                },
+                {
+                    question: "What is the escape velocity of Earth?",
+                    options: ["9.8 km/s", "11.2 km/s", "15.5 km/s", "7.9 km/s"],
+                    correct: 1
+                },
+                {
+                    question: "In JavaScript, what does 'NaN' stand for?",
+                    options: ["Not a Number", "Null and None", "New Array Node", "Not an Node"],
+                    correct: 0
+                },
+                {
+                    question: "Which HTTP status code indicates 'Not Found'?",
+                    options: ["200", "404", "500", "403"],
+                    correct: 1
+                },
+                {
+                    question: "What is the chemical formula for table salt?",
+                    options: ["NaCl", "KCl", "CaCl2", "MgCl2"],
+                    correct: 0
+                },
+                {
+                    question: "Which database concept ensures ACID properties?",
+                    options: ["Normalization", "Indexing", "Transactions", "Replication"],
+                    correct: 2
+                },
+                {
+                    question: "What is the maximum number of electrons in the third shell?",
+                    options: ["8", "16", "18", "32"],
+                    correct: 2
+                }
+            ]
+        };
+
+        // Game State
+        let currentQuiz = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let userAnswers = [];
+        let gameSettings = {
+            difficulty: 'easy',
+            questionCount: 10
+        };
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const reviewScreen = document.getElementById('review-screen');
+        const startBtn = document.getElementById('start-btn');
+        const difficultySelect = document.getElementById('difficulty');
+        const questionText = document.getElementById('question-text');
+        const answersContainer = document.getElementById('answers-container');
+        const nextBtn = document.getElementById('next-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const questionCounter = document.getElementById('question-counter');
+        const scoreDisplay = document.getElementById('score-display');
+        const progressBar = document.getElementById('progress-bar');
+        const restartBtn = document.getElementById('restart-btn');
+        const reviewBtn = document.getElementById('review-btn');
+        const backToResultsBtn = document.getElementById('back-to-results');
+
+        // Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', nextQuestion);
+        skipBtn.addEventListener('click', skipQuestion);
+        restartBtn.addEventListener('click', restartQuiz);
+        reviewBtn.addEventListener('click', showReview);
+        backToResultsBtn.addEventListener('click', () => showScreen('result-screen'));
+
+        // Utility Functions
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startQuiz() {
+            gameSettings.difficulty = difficultySelect.value;
+            gameSettings.questionCount = gameSettings.difficulty === 'easy' ? 10 : 
+                                       gameSettings.difficulty === 'medium' ? 15 : 20;
+            
+            // Shuffle and select questions
+            const allQuestions = shuffleArray(quizData[gameSettings.difficulty]);
+            currentQuiz = allQuestions.slice(0, gameSettings.questionCount);
+            
+            // Reset game state
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            selectedAnswer = null;
+            
+            showScreen('quiz-screen');
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = currentQuiz[currentQuestionIndex];
+            questionText.textContent = question.question;
+            
+            // Update counters
+            questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${gameSettings.questionCount}`;
+            scoreDisplay.textContent = `Score: ${score}`;
+            
+            // Update progress bar
+            const progress = ((currentQuestionIndex) / gameSettings.questionCount) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Display answers
+            answersContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'answer-option';
+                answerDiv.textContent = option;
+                answerDiv.addEventListener('click', () => selectAnswer(index, answerDiv));
+                answersContainer.appendChild(answerDiv);
+            });
+            
+            // Reset buttons
+            nextBtn.disabled = true;
+            selectedAnswer = null;
+        }
+
+        function selectAnswer(answerIndex, answerElement) {
+            // Remove previous selection
+            document.querySelectorAll('.answer-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Select new answer
+            answerElement.classList.add('selected');
+            selectedAnswer = answerIndex;
+            nextBtn.disabled = false;
+        }
+
+        function nextQuestion() {
+            if (selectedAnswer === null) return;
+            
+            const question = currentQuiz[currentQuestionIndex];
+            const isCorrect = selectedAnswer === question.correct;
+            
+            // Store user answer
+            userAnswers.push({
+                question: question.question,
+                options: question.options,
+                userAnswer: selectedAnswer,
+                correctAnswer: question.correct,
+                isCorrect: isCorrect
+            });
+            
+            if (isCorrect) {
+                score++;
+            }
+            
+            // Show correct answer briefly
+            showAnswerFeedback();
+            
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < currentQuiz.length) {
+                    displayQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1500);
+        }
+
+        function skipQuestion() {
+            const question = currentQuiz[currentQuestionIndex];
+            
+            // Store skipped answer
+            userAnswers.push({
+                question: question.question,
+                options: question.options,
+                userAnswer: null,
+                correctAnswer: question.correct,
+                isCorrect: false,
+                skipped: true
+            });
+            
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuiz.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showAnswerFeedback() {
+            const question = currentQuiz[currentQuestionIndex];
+            const answerOptions = document.querySelectorAll('.answer-option');
+            
+            answerOptions.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedAnswer && selectedAnswer !== question.correct) {
+                    option.classList.add('wrong');
+                }
+                option.style.pointerEvents = 'none';
+            });
+            
+            nextBtn.disabled = true;
+            skipBtn.disabled = true;
+        }
+
+        function showResults() {
+            showScreen('result-screen');
+            
+            const finalScore = document.getElementById('final-score');
+            const scoreTotal = document.querySelector('.score-total');
+            const resultTitle = document.getElementById('result-title');
+            const resultDescription = document.getElementById('result-description');
+            const correctCount = document.getElementById('correct-count');
+            const wrongCount = document.getElementById('wrong-count');
+            const accuracy = document.getElementById('accuracy');
+            
+            const percentage = Math.round((score / gameSettings.questionCount) * 100);
+            
+            finalScore.textContent = score;
+            scoreTotal.textContent = `/ ${gameSettings.questionCount}`;
+            correctCount.textContent = score;
+            wrongCount.textContent = gameSettings.questionCount - score;
+            accuracy.textContent = `${percentage}%`;
+            
+            // Result messages based on performance
+            if (percentage >= 90) {
+                resultTitle.textContent = "Outstanding! 🌟";
+                resultDescription.textContent = "You're a quiz master!";
+            } else if (percentage >= 70) {
+                resultTitle.textContent = "Great Job! 👏";
+                resultDescription.textContent = "You did really well!";
+            } else if (percentage >= 50) {
+                resultTitle.textContent = "Good Effort! 👍";
+                resultDescription.textContent = "Keep practicing and you'll improve!";
+            } else {
+                resultTitle.textContent = "Keep Learning! 📚";
+                resultDescription.textContent = "Practice makes perfect!";
+            }
+            
+            // Progress bar animation
+            setTimeout(() => {
+                progressBar.style.width = '100%';
+            }, 500);
+        }
+
+        function showReview() {
+            showScreen('review-screen');
+            
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+            
+            userAnswers.forEach((answer, index) => {
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'review-item';
+                
+                const questionNum = document.createElement('h4');
+                questionNum.textContent = `Question ${index + 1}`;
+                
+                const questionText = document.createElement('p');
+                questionText.className = 'review-question';
+                questionText.textContent = answer.question;
+                
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'review-options';
+                
+                answer.options.forEach((option, optIndex) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'review-option';
+                    optionDiv.textContent = option;
+                    
+                    if (optIndex === answer.correctAnswer) {
+                        optionDiv.classList.add('correct');
+                    }
+                    if (optIndex === answer.userAnswer && !answer.isCorrect) {
+                        optionDiv.classList.add('wrong');
+                    }
+                    if (answer.skipped && optIndex === answer.correctAnswer) {
+                        optionDiv.classList.add('skipped');
+                    }
+                    
+                    optionsDiv.appendChild(optionDiv);
+                });
+                
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'review-status';
+                if (answer.skipped) {
+                    statusDiv.textContent = '⏭️ Skipped';
+                    statusDiv.classList.add('skipped');
+                } else if (answer.isCorrect) {
+                    statusDiv.textContent = '✅ Correct';
+                    statusDiv.classList.add('correct');
+                } else {
+                    statusDiv.textContent = '❌ Wrong';
+                    statusDiv.classList.add('wrong');
+                }
+                
+                reviewItem.appendChild(questionNum);
+                reviewItem.appendChild(questionText);
+                reviewItem.appendChild(optionsDiv);
+                reviewItem.appendChild(statusDiv);
+                
+                reviewContainer.appendChild(reviewItem);
+            });
+        }
+
+        function restartQuiz() {
+            showScreen('start-screen');
+            
+            // Reset progress bar
+            progressBar.style.width = '0%';
+            
+            // Reset button states
+            nextBtn.disabled = true;
+            skipBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>
